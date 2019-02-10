@@ -19,7 +19,7 @@ Current build status
 ====================
 
 [![Linux](https://img.shields.io/circleci/project/github/conda-forge/omcompiler-feedstock/master.svg?label=Linux)](https://circleci.com/gh/conda-forge/omcompiler-feedstock)
-![OSX disabled](https://img.shields.io/badge/OSX-disabled-lightgrey.svg)
+[![OSX](https://img.shields.io/travis/conda-forge/omcompiler-feedstock/master.svg?label=macOS)](https://travis-ci.org/conda-forge/omcompiler-feedstock)
 ![Windows disabled](https://img.shields.io/badge/Windows-disabled-lightgrey.svg)
 
 Current release info
