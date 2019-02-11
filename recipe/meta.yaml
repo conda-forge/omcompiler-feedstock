@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 2
+  number: 3
   skip: true  # [not linux]
 
 requirements:
@@ -35,10 +35,16 @@ requirements:
     - lp_solve
     - openjdk
     - openblas
+    - {{ compiler('fortran') }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
 
 test:
+  requires:
+    - git
   commands:
     - omc --version
+    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && ./mo2fmu.sh ./otfmi/example/file/deviation.mo
 
 about:
    home: https://openmodelica.org/
