@@ -16,6 +16,9 @@ sed -i "s|DLAPACK_ENABLE:Bool=ON|DLAPACK_ENABLE:Bool=ON -DCMAKE_PREFIX_PATH=${PR
 sed -i "s|\-lOpenModelicaCompiler|\-L${PREFIX}/lib \-lOpenModelicaCompiler|g" common/m4/omhome.m4
 sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,${PREFIX}/lib \-Wl,\-rpath\-link,|g" configure.ac
 
+# add fpic to fmi build flags
+sed -i "s|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1 \-fPIC|g" SimulationRuntime/fmi/export/buildproject/configure.ac Compiler/Script/CevalScriptBackend.mo
+
 autoconf
 ./configure --prefix=${PREFIX} --with-cppruntime
 make -j${CPU_COUNT}

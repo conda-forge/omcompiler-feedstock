@@ -44,7 +44,7 @@ test:
     - git
   commands:
     - omc --version
-    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && ./mo2fmu.sh ./otfmi/example/file/deviation.mo
+    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && CPPFLAGS="-fPIC" ./mo2fmu.sh ./otfmi/example/file/deviation.mo
 
 about:
    home: https://openmodelica.org/
