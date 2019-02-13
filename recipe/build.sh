@@ -17,7 +17,7 @@ sed -i "s|\-lOpenModelicaCompiler|\-L${PREFIX}/lib \-lOpenModelicaCompiler|g" co
 sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,${PREFIX}/lib \-Wl,\-rpath\-link,|g" configure.ac
 
 autoconf
-./configure --prefix=${PREFIX}
+./configure --prefix=${PREFIX} --with-cppruntime
 make -j${CPU_COUNT}
 make install
 
