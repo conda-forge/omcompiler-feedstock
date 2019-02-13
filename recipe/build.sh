@@ -3,6 +3,10 @@
 git submodule -q sync
 git submodule -q update --init --recursive
 
+# dont include the build prefix
+export CC=`basename ${CC}`
+export CPP=`basename ${CPP}`
+
 # netstream does not build with conda-forge's default c++1z
 export CXXFLAGS="${CXXFLAGS} -std=c++14"
 
