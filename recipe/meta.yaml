@@ -38,13 +38,16 @@ requirements:
     - {{ compiler('fortran') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - zip
 
 test:
   requires:
     - git
+    - pyfmi
   commands:
     - omc --version
-    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && CPPFLAGS="-fPIC" ./mo2fmu.sh ./otfmi/example/file/deviation.mo
+    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && ./mo2fmu.sh ./otfmi/example/file/deviation.mo /tmp/deviation.fmu
+    - python -c "import pyfmi; model = pyfmi.load_fmu('/tmp/deviation.fmu'); res = model.simulate(); print([(x, res[x][0]) for x in res.keys()])"
 
 about:
    home: https://openmodelica.org/
