@@ -42,12 +42,11 @@ requirements:
 
 test:
   requires:
-    - git
     - pyfmi
   commands:
     - omc --version
-    - cd /tmp && git clone https://github.com/openturns/otfmi.git && cd otfmi && ./mo2fmu.sh ./otfmi/example/file/deviation.mo /tmp/deviation.fmu
-    - python -c "import pyfmi; model = pyfmi.load_fmu('/tmp/deviation.fmu'); res = model.simulate(); print([(x, res[x][0]) for x in res.keys()])"
+    - cd /tmp && curl -fsSO https://raw.githubusercontent.com/openturns/otfmi/master/mo2fmu.sh && sh mo2fmu.sh ${PREFIX}/share/doc/omc/testmodels/BouncingBall.mo /tmp/BouncingBall.fmu
+    - python -c "import pyfmi; model = pyfmi.load_fmu('/tmp/BouncingBall.fmu'); res = model.simulate(); print([(v, res[v][-1]) for v in res.keys()])"
 
 about:
    home: https://openmodelica.org/
