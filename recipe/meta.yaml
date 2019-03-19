@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 4
+  number: 5
   skip: true  # [not linux]
 
 requirements:
@@ -28,13 +28,12 @@ requirements:
     - expat
     - lp_solve
     - openjdk
-    - openblas
+    - liblapack
   run:
     - bdw-gc
     - expat
     - lp_solve
     - openjdk
-    - openblas
     - {{ compiler('fortran') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
