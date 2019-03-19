@@ -8,6 +8,8 @@ source:
   # use git because no tarball including submodules is available
   git_url: https://github.com/OpenModelica/OMCompiler.git
   git_tag: v{{ version }}
+  patches:
+    - 0001-Remove-deprecated-lapack-apis.patch
 
 build:
   number: 5
