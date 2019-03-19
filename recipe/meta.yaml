@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 4
+  number: 5
   skip: true  # [not linux]
 
 requirements:
@@ -24,17 +24,17 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
+    - libblas
+    - libcblas
     - bdw-gc
     - expat
     - lp_solve
     - openjdk
-    - openblas
   run:
     - bdw-gc
     - expat
     - lp_solve
     - openjdk
-    - openblas
     - {{ compiler('fortran') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
