@@ -24,7 +24,7 @@ sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpa
 sed -i "s|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1 \-fPIC|g" SimulationRuntime/fmi/export/buildproject/configure.ac Compiler/Script/CevalScriptBackend.mo
 
 autoconf
-./configure --prefix=${PREFIX} --with-cppruntime
+# use --with-lapack as there is no .so in the openblas variant of liblapack selected as run dependency
+./configure --prefix=${PREFIX} --with-cppruntime --with-lapack="${PREFIX}/lib/liblapack.so.3 ${PREFIX}/lib/libblas.so.3"
 make -j${CPU_COUNT}
 make install
-
