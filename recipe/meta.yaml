@@ -12,7 +12,7 @@ source:
     - 0001-Remove-deprecated-lapack-apis.patch
 
 build:
-  number: 7
+  number: 8
   skip: true  # [not linux]
 
 requirements:
@@ -36,9 +36,7 @@ requirements:
     - expat
     - lp_solve
     - openjdk
-    - {{ compiler('fortran') }}
     - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
     - zip
 
 test:
