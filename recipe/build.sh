@@ -25,6 +25,6 @@ sed -i "s|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1|\-DOMC_MINIMAL_RUNTIME=1
 
 autoconf
 # use --with-lapack as there is no .so in the openblas variant of liblapack selected as run dependency
-./configure --prefix=${PREFIX} --with-cppruntime --with-lapack="${PREFIX}/lib/liblapack.so.3 ${PREFIX}/lib/libblas.so.3"
+./configure --prefix=${PREFIX} --with-lapack="${PREFIX}/lib/liblapack.so.3 ${PREFIX}/lib/libblas.so.3"
 make -j${CPU_COUNT}
 make install
