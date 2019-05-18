@@ -32,7 +32,6 @@ requirements:
     - openjdk
     - liblapack
   run:
-    - bdw-gc
     - expat
     - lp_solve
     - {{ compiler('c') }}
