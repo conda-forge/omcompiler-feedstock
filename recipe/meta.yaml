@@ -12,7 +12,7 @@ source:
     - 0001-Remove-deprecated-lapack-apis.patch
 
 build:
-  number: 8
+  number: 9
   skip: true  # [not linux]
 
 requirements:
@@ -35,7 +35,6 @@ requirements:
     - bdw-gc
     - expat
     - lp_solve
-    - openjdk
     - {{ compiler('c') }}
     - zip
 
