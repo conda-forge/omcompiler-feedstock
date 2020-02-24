@@ -24,6 +24,9 @@ sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpa
 sed -i "s|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1 \-fPIC|g" SimulationRuntime/fmi/export/buildproject/configure.ac Compiler/Script/CevalScriptBackend.mo
 
 autoconf
-./configure --prefix=${PREFIX}
+./configure --prefix=${PREFIX} --with-cppruntime
 make -j${CPU_COUNT}
 make install
+ls -l ${PREFIX}/include/omc
+exit 1
+
