@@ -4,13 +4,13 @@ Date: Tue, 19 Mar 2019 13:32:55 +0100
 Subject: [PATCH] Drop deprecated LAPACK apis
 
 ---
- Compiler/runtime/lapackimpl.c | 101 ----------------------------------
+ OMCompiler/Compiler/runtime/lapackimpl.c | 101 ----------------------------------
  1 file changed, 101 deletions(-)
 
-diff --git a/Compiler/runtime/lapackimpl.c b/Compiler/runtime/lapackimpl.c
+diff --git a/OMCompiler/Compiler/runtime/lapackimpl.c b/OMCompiler/Compiler/runtime/lapackimpl.c
 index 6ee208fce..6a7ac6411 100644
---- a/Compiler/runtime/lapackimpl.c
-+++ b/Compiler/runtime/lapackimpl.c
+--- a/OMCompiler/Compiler/runtime/lapackimpl.c
++++ b/OMCompiler/Compiler/runtime/lapackimpl.c
 @@ -355,48 +355,7 @@ void LapackImpl__dgegv(const char *jobvl, const char *jobvr, int N, void *A, int
      void **ALPHAR, void **ALPHAI, void **BETA, void **VL, void **VR,
      void **outWORK, int *INFO)

@@ -2,6 +2,7 @@
 
 git submodule -q sync
 git submodule -q update --init --recursive
+cd OMCompiler
 
 # dont include the build prefix
 export CC=`basename ${CC}`
