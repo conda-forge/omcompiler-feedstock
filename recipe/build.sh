@@ -23,6 +23,9 @@ sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpa
 # add fpic to fmi build flags
 sed -i "s|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1|\-DOMC_MINIMAL_RUNTIME=1 \-DCMINPACK_NO_DLL=1 \-fPIC|g" SimulationRuntime/fmi/export/buildproject/configure.ac Compiler/Script/CevalScriptBackend.mo
 
+# Compiler/runtime/libomcruntime-boot.so: undefined reference to `libiconv
+sed -i "s|\-lzmq|\-lzmq \-liconv|g" configure.ac
+
 autoconf
 ./configure --prefix=${PREFIX}
 make -j${CPU_COUNT}
