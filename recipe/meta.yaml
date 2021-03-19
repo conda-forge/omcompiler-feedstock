@@ -1,4 +1,4 @@
-{% set version = "1.13.2" %}
+{% set version = "1.16.5" %}
 
 package:
   name: omcompiler
@@ -6,13 +6,11 @@ package:
 
 source:
   # use git because no tarball including submodules is available
-  git_url: https://github.com/OpenModelica/OMCompiler.git
+  git_url: https://github.com/OpenModelica/OpenModelica.git
   git_tag: v{{ version }}
-  patches:
-    - 0001-Remove-deprecated-lapack-apis.patch
 
 build:
-  number: 10
+  number: 0
   skip: true  # [not linux]
 
 requirements:
@@ -30,6 +28,7 @@ requirements:
     - lp_solve
     - openjdk
     - liblapack
+    - libcurl
   run:
     - expat
     - lp_solve
