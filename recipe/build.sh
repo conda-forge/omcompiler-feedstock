@@ -2,6 +2,10 @@
 
 git submodule -q sync
 git submodule -q update --init --recursive
+
+# locale install fail
+curl -L https://github.com/OpenModelica/OpenModelica/pull/7327.patch | patch -p1
+
 cd OMCompiler
 
 # dont include the build prefix
@@ -23,6 +27,9 @@ sed -i "s|\-DCMINPACK_NO_DLL=1|\-DCMINPACK_NO_DLL=1 \-fPIC|g" SimulationRuntime/
 
 # Compiler/runtime/libomcruntime-boot.so: undefined reference to `libiconv
 sed -i "s|\-lzmq|\-lzmq \-liconv|g" configure.ac
+
+# KLU detection error
+sed -i "s|try_compile(LTEST_OK \${KLUTest_DIR} \${KLUTest_DIR} ltest OUTPUT_VARIABLE MY_OUTPUT)|set(LTEST_OK TRUE)|g" 3rdParty/sundials-5.4.0/config/SundialsKLU.cmake
 
 autoconf
 ./configure --prefix=${PREFIX}
