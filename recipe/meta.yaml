@@ -1,4 +1,4 @@
-{% set version = "1.16.5" %}
+{% set version = "1.17.0" %}
 
 package:
   name: omcompiler
