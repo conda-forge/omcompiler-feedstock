@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 1
+  number: 2
   skip: true  # [not linux]
 
 requirements:
@@ -37,12 +37,8 @@ requirements:
     - zip
 
 test:
-  requires:
-    - pyfmi
   commands:
     - omc --version
-    - cd /tmp && curl -fsSO https://raw.githubusercontent.com/openturns/otfmi/master/mo2fmu.sh && sh mo2fmu.sh ${PREFIX}/share/doc/omc/testmodels/BouncingBall.mo
-    - python -c "import pyfmi; model = pyfmi.load_fmu('/tmp/BouncingBall.fmu'); res = model.simulate(); print([(v, res[v][-1]) for v in res.keys()])"
 
 about:
    home: https://openmodelica.org/
