@@ -15,7 +15,7 @@ cxx_compiler_version:
 docker_image:
 - quay.io/condaforge/linux-anvil-comp7
 expat:
-- '2.3'
+- '2'
 fortran_compiler:
 - gfortran
 fortran_compiler_version:
@@ -25,8 +25,6 @@ libcurl:
 liblapack:
 - 3.8 *netlib
 pin_run_as_build:
-  expat:
-    max_pin: x.x
   libcurl:
     max_pin: x
 target_platform:
