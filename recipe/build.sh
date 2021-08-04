@@ -3,6 +3,9 @@
 git submodule -q sync
 git submodule -q update --init --recursive
 
+# cmake 3.20 build fails
+curl -L https://github.com/OpenModelica/OpenModelica/pull/7445.patch | patch -p1
+
 # locale install fail
 curl -L https://github.com/OpenModelica/OpenModelica/pull/7327.patch | patch -p1
 
@@ -16,7 +19,7 @@ export CPP=`basename ${CPP}`
 export CXXFLAGS="${CXXFLAGS} -std=c++14"
 
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
-cd 3rdParty/FMIL && curl -L https://raw.githubusercontent.com/conda-forge/fmilib-feedstock/master/recipe/undef_gnu_source.patch | patch -p1 && cd -
+curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d 3rdParty
 
 # help find conda dependencies in prefix
 sed -i "s|\-lOpenModelicaCompiler|\-L${PREFIX}/lib \-lOpenModelicaCompiler|g" common/m4/omhome.m4
