@@ -3,12 +3,6 @@
 git submodule -q sync
 git submodule -q update --init --recursive
 
-# cmake 3.20 build fails
-curl -L https://github.com/OpenModelica/OpenModelica/pull/7445.patch | patch -p1
-
-# locale install fail
-curl -L https://github.com/OpenModelica/OpenModelica/pull/7327.patch | patch -p1
-
 cd OMCompiler
 
 # dont include the build prefix
