@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 git submodule -q sync
 git submodule -q update --init --recursive
 
@@ -13,10 +15,11 @@ export CPP=`basename ${CPP}`
 cd 3rdParty/libzmq/
 mkdir -p build && cd build
 # cmake  -DCMAKE_INSTALL_MESSAGE=LAZY -DCMAKE_VERBOSE_MAKEFILE:Bool=ON -DCMAKE_AR:String="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-ar" -DCMAKE_INSTALL_PREFIX="`pwd`" -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_COLOR_MAKEFILE:Bool=OFF -DWITH_PERF_TOOL:Bool=OFF -DZMQ_BUILD_TESTS:Bool=OFF -DENABLE_CPACK:Bool=OFF -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles"
-cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX="`pwd`" -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release ..
+cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX="`pwd`" -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DZMQ_BUILD_TESTS:Bool=OFF ..
 make
-find . -name local_lat
-file bin/local_lat || echo "nope"
+ls -l bin
+# find . -name local_lat
+# file bin/local_lat || echo "nope"
 make install
 cd ${SRC_DIR}/OMCompiler
 
