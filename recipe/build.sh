@@ -30,5 +30,7 @@ export CPP=`basename ${CPP}`
 
 autoconf
 ./configure --prefix=${PREFIX}
-make -j${CPU_COUNT}
+make || ls -l 3rdParty/libzmq/build/lib/
+find . -name "libzmq.so.*"
+#make -j${CPU_COUNT}
 make install
