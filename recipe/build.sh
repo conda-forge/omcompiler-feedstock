@@ -9,6 +9,9 @@ cd OMCompiler
 export CC=`basename ${CC}`
 export CPP=`basename ${CPP}`
 
+# https://github.com/OpenModelica/OpenModelica/issues/7064
+sed -i 's|SOVERSION "5.1.3"|SOVERSION "4.2.3"|g' 3rdParty/libzmq/CMakeLists.txt
+
 # netstream does not build with conda-forge's default c++1z
 #export CXXFLAGS="${CXXFLAGS} -std=c++14"
 
