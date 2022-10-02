@@ -19,10 +19,10 @@ cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX="`pwd`" -DCMAKE_INSTALL_LIBDIR=lib -D
 make
 
 ls -l bin
-ls -l $PWD/bin/local_lat
+strace ls -l $PWD/bin/local_lat
 # find . -name local_lat
 # file bin/local_lat || echo "nope"
-make install
+strace make install
 cd ${SRC_DIR}/OMCompiler
 
 # cmake -DCMAKE_INSTALL_PREFIX=
