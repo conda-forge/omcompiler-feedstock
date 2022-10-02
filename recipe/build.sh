@@ -33,7 +33,7 @@ sed -i 's|SOVERSION "5.1.3"|SOVERSION "4.2.3"|g' 3rdParty/libzmq/CMakeLists.txt
 
 autoconf
 ./configure --prefix=${PREFIX}
-make || ls -l 3rdParty/libzmq/build/lib/
-find . -name "libzmq.so.*"
+make || ( ls -l 3rdParty/libzmq/build/lib/ && find . -name "libzmq*" )
+# find . -name "libzmq*"
 #make -j${CPU_COUNT}
 make install
