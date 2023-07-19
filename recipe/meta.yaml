@@ -25,7 +25,6 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
-    - expat
     - lp_solve
     - openjdk
     - libblas
@@ -33,7 +32,6 @@ requirements:
     - libcurl
     - boost-cpp
   run:
-    - expat
     - lp_solve
     - openjdk
     - {{ compiler('c') }}
