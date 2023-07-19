@@ -27,7 +27,6 @@ requirements:
   host:
     - expat
     - lp_solve
-    - openjdk
     - libblas
     - liblapack
     - libcurl
@@ -35,7 +34,6 @@ requirements:
   run:
     - expat
     - lp_solve
-    - openjdk
     - {{ compiler('c') }}
     - zip
 
