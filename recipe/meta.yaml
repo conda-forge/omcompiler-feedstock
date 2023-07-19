@@ -25,14 +25,12 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
-    - lp_solve
     - openjdk
     - libblas
     - liblapack
     - libcurl
     - boost-cpp
   run:
-    - lp_solve
     - openjdk
     - {{ compiler('c') }}
     - zip
