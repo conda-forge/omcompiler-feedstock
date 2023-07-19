@@ -16,19 +16,21 @@ build:
 requirements:
   build:
     - cmake
+    - ninja
+    - pkg-config
     - autoconf
     - automake
     - make
     - libtool
-    - pkg-config
-    - {{ compiler('fortran') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
   host:
     - openjdk
     - libblas
     - liblapack
     - libcurl
+    - libuuid
     - boost-cpp
   run:
     - openjdk
