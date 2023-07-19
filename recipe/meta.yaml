@@ -26,7 +26,6 @@ requirements:
     - {{ compiler('cxx') }}
   host:
     - expat
-    - lp_solve
     - openjdk
     - libblas
     - liblapack
@@ -34,7 +33,6 @@ requirements:
     - boost-cpp
   run:
     - expat
-    - lp_solve
     - openjdk
     - {{ compiler('c') }}
     - zip
