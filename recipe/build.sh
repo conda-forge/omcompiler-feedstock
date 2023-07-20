@@ -10,7 +10,7 @@ export CC=`basename ${CC}`
 export CPP=`basename ${CPP}`
 
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
-curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d 3rdParty
+#curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d 3rdParty
 
 # help find conda dependencies in prefix
 sed -i "s|\-lOpenModelicaCompiler|\-L${PREFIX}/lib \-lOpenModelicaCompiler|g" common/m4/omhome.m4
