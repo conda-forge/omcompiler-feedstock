@@ -5,12 +5,19 @@ git submodule -q update --init --recursive
 
 cd OMCompiler
 
+# dont include the build prefix that wont exist when compiling FMUs
+export CC=`basename ${CC}`
+export CPP=`basename ${CPP}`
+
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
 curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d 3rdParty
 
 # help find conda dependencies in prefix
 sed -i "s|\-lOpenModelicaCompiler|\-L${PREFIX}/lib \-lOpenModelicaCompiler|g" common/m4/omhome.m4
 sed -i "s|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,|RT_LDFLAGS_SHARED=\"\-Wl,\-rpath\-link,${PREFIX}/lib \-Wl,\-rpath\-link,|g" configure.ac
+
+# link with shared blas/lapack libs: https://github.com/OpenModelica/OpenModelica/issues/10304
+sed -i "s|-Wl,-Bstatic -lSimulationRuntimeFMI \$LDFLAGS \$LD_LAPACK -Wl,-Bdynamic|-Wl,-Bstatic -lSimulationRuntimeFMI -Wl,-Bdynamic \$LDFLAGS \$LD_LAPACK|g" configure.ac
 
 # Compiler/runtime/libomcruntime-boot.so: undefined reference to `libiconv
 sed -i "s|\-lzmq|\-lzmq \-liconv|g" configure.ac

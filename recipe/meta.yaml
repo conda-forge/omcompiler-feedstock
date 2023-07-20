@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 0
+  number: 1
   skip: true  # [not linux]
 
 requirements:
@@ -32,12 +32,19 @@ requirements:
     - boost-cpp
   run:
     - openjdk
+    - make
     - {{ compiler('c') }}
     - zip
 
 test:
+  requires:
+    - curl
   commands:
     - omc --version
+    - curl -LO https://github.com/OpenModelica/OpenModelica/raw/v{{ version }}/OMCompiler/Examples/Circle.mo
+    - echo 'loadFile("Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
+    - omc export.mos
+    - ls Circle.fmu
 
 about:
    home: https://openmodelica.org/
