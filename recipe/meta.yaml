@@ -10,7 +10,7 @@ source:
   git_tag: v{{ version }}
 
 build:
-  number: 1
+  number: 2
   skip: true  # [not linux]
 
 requirements:
@@ -32,8 +32,10 @@ requirements:
     - boost-cpp
   run:
     - openjdk
+    - cmake
     - make
     - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
     - zip
 
 test:
@@ -43,6 +45,9 @@ test:
     - omc --version
     - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
     - omc export.mos
+    - ls Circle.fmu
+    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle, platforms={"dynamic"}); getErrorString();' > export.mos
+    - omc --fmuCMakeBuild=true --fmuRuntimeDepends=modelica export.mos
     - ls Circle.fmu
 
 about:
