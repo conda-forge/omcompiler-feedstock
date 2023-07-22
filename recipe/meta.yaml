@@ -39,11 +39,12 @@ requirements:
 test:
   requires:
     - curl
+    - cmake
   commands:
     - omc --version
     - curl -LO https://github.com/OpenModelica/OpenModelica/raw/v{{ version }}/OMCompiler/Examples/Circle.mo
     - echo 'loadFile("Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
-    - omc export.mos
+    - omc --fmuCMakeBuild=true --fmuRuntimeDepends=modelica export.mos
     - ls Circle.fmu
 
 about:
