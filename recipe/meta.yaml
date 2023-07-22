@@ -37,12 +37,11 @@ requirements:
     - zip
 
 test:
-  requires:
-    - curl
+  source_files:
+    - OMCompiler/Examples/Circle.mo
   commands:
     - omc --version
-    - curl -LO https://github.com/OpenModelica/OpenModelica/raw/v{{ version }}/OMCompiler/Examples/Circle.mo
-    - echo 'loadFile("Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
+    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
     - omc export.mos
     - ls Circle.fmu
 
