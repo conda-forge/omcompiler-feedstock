@@ -31,14 +31,10 @@ pkgs_dirs:
 
 CONDARC
 
-
-mamba install --update-specs --yes --quiet --channel conda-forge \
-    conda-build pip boa conda-forge-ci-setup=3
-mamba update --update-specs --yes --quiet --channel conda-forge \
-    conda-build pip boa conda-forge-ci-setup=3
-
-# https://github.com/conda/conda-build/issues/4895
-git config --global protocol.file.allow always
+mamba install --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
+    pip mamba conda-build boa conda-forge-ci-setup=3
+mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
+    pip mamba conda-build boa conda-forge-ci-setup
 
 # set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
