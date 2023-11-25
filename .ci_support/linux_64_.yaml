@@ -20,12 +20,16 @@ fortran_compiler:
 - gfortran
 fortran_compiler_version:
 - '12'
-libcurl:
-- '8'
-liblapack:
-- 3.9 *netlib
 libblas:
 - 3.9 *netlib
+libcurl:
+- '8'
+libiconv:
+- '1'
+liblapack:
+- 3.9 *netlib
+libuuid:
+- '2'
 target_platform:
 - linux-64
 zip_keys:
