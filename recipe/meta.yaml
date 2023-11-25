@@ -25,11 +25,14 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
+    - expat
     - openjdk
     - libblas
     - liblapack
     - libcurl
     - libboost-headers
+    - libiconv
+    - libuuid
   run:
     - openjdk
     - cmake
