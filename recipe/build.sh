@@ -6,9 +6,6 @@ git submodule -q update --init --recursive
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
 curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d OMCompiler/3rdParty
 
-# https://github.com/OpenModelica/OpenModelica/issues/10986
-curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/145.patch | patch -p1 -d OMCompiler/3rdParty
-
 # link with shared blas/lapack libs: https://github.com/OpenModelica/OpenModelica/issues/10304
 sed -i "s|-Wl,-Bstatic -lSimulationRuntimeFMI \$LDFLAGS \$LD_LAPACK -Wl,-Bdynamic|-Wl,-Bstatic -lSimulationRuntimeFMI -Wl,-Bdynamic \$LDFLAGS \$LD_LAPACK|g" OMCompiler/configure.ac
 
