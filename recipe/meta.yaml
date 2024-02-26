@@ -18,9 +18,6 @@ requirements:
     - cmake
     - ninja
     - pkg-config
-    - autoconf
-    - automake
-    - make
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('fortran') }}
