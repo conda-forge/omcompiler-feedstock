@@ -29,7 +29,7 @@ requirements:
     - libblas
     - liblapack
     - libcurl
-    - libboost-headers
+    - libboost-devel
     - libiconv
     - libuuid
   run:
