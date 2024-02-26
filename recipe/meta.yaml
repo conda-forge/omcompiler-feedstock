@@ -1,4 +1,4 @@
-{% set version = "1.22.0" %}
+{% set version = "1.22.2" %}
 
 package:
   name: omcompiler
@@ -16,16 +16,15 @@ build:
 requirements:
   build:
     - cmake
+    - ninja
+    - pkg-config
     - autoconf
     - automake
     - make
-    - libtool
-    - pkg-config
-    - {{ compiler('fortran') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
   host:
-    - expat
     - openjdk
     - libblas
     - liblapack
