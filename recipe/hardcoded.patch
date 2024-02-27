@@ -1,8 +1,19 @@
 diff --git a/OMCompiler/Compiler/Script/CevalScriptBackend.mo b/OMCompiler/Compiler/Script/CevalScriptBackend.mo
-index f68227c1cf..0f0d68b27f 100644
+index f68227c1cf..c7457f9345 100644
 --- a/OMCompiler/Compiler/Script/CevalScriptBackend.mo
 +++ b/OMCompiler/Compiler/Script/CevalScriptBackend.mo
-@@ -3600,7 +3600,7 @@ algorithm
+@@ -3566,8 +3566,8 @@ algorithm
+   fmuSourceDir := fmutmp+"/sources/";
+   quote := "'";
+   dquote := if isWindows then "\"" else "'";
+-  CC := "-DCMAKE_C_COMPILER=" + dquote + makefileParams.ccompiler + dquote;
+-  CXX := "-DCMAKE_CXX_COMPILER=" + dquote + makefileParams.cxxcompiler + dquote;
++  CC := "-DCMAKE_C_COMPILER=" + dquote + System.basename(makefileParams.ccompiler) + dquote;
++  CXX := "-DCMAKE_CXX_COMPILER=" + dquote + System.basename(makefileParams.cxxcompiler) + dquote;
+   defaultFmiIncludeDirectoy := dquote + Settings.getInstallationDirectoryPath() + "/include/omc/c/fmi" + dquote;
+ 
+   // Set build type
+@@ -3600,13 +3600,13 @@ algorithm
            CMAKE_GENERATOR := "-G " + dquote + "MSYS Makefiles" + dquote + " ";
          end if;
          buildDir := "build_cmake_dynamic";
@@ -11,3 +22,26 @@ index f68227c1cf..0f0d68b27f 100644
                       CMAKE_BUILD_TYPE + " " + CC + " " + CXX +
                       " ..";
          cmd := "cd " + dquote + fmuSourceDir + dquote + " && " +
+                "mkdir " + buildDir + " && cd " + buildDir + " && " +
+                cmakeCall + " && " +
+-               Autoconf.cmake + " --build . --parallel " + getProcsStr() + " --target install && " +
++               "cmake --build . --parallel " + getProcsStr() + " --target install && " +
+                "cd .. && rm -rf " + buildDir;
+         if 0 <> System.systemCall(cmd, outFile=logfile) then
+           Error.addMessage(Error.SIMULATOR_BUILD_ERROR, {"cmd: " + cmd + "\n" + System.readFile(logfile)});
+@@ -3619,13 +3619,13 @@ algorithm
+           CMAKE_GENERATOR := "-G " + dquote + "MSYS Makefiles" + dquote + " ";
+         end if;
+         buildDir := "build_cmake_dynamic";
+-        cmakeCall := Autoconf.cmake + " " + CMAKE_GENERATOR +
++        cmakeCall := "cmake " + CMAKE_GENERATOR +
+                      CMAKE_BUILD_TYPE + " " + CC + " " + CXX +
+                      " ..";
+         cmd := "cd " + dquote + fmuSourceDir + dquote + " && " +
+                "mkdir " + buildDir + " && cd " + buildDir + " && " +
+                cmakeCall + " && " +
+-               Autoconf.cmake + " --build . --parallel " + getProcsStr() + " --target install && " +
++               "cmake --build . --parallel " + getProcsStr() + " --target install && " +
+                "cd .. && rm -rf " + buildDir;
+         if 0 <> System.systemCall(cmd, outFile=logfile) then
+           Error.addMessage(Error.SIMULATOR_BUILD_ERROR, {"cmd: " + cmd + "\n" + System.readFile(logfile)});
