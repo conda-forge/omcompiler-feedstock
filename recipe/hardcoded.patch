@@ -1,0 +1,13 @@
+diff --git a/OMCompiler/Compiler/Script/CevalScriptBackend.mo b/OMCompiler/Compiler/Script/CevalScriptBackend.mo
+index f68227c1cf..0f0d68b27f 100644
+--- a/OMCompiler/Compiler/Script/CevalScriptBackend.mo
++++ b/OMCompiler/Compiler/Script/CevalScriptBackend.mo
+@@ -3600,7 +3600,7 @@ algorithm
+           CMAKE_GENERATOR := "-G " + dquote + "MSYS Makefiles" + dquote + " ";
+         end if;
+         buildDir := "build_cmake_dynamic";
+-        cmakeCall := Autoconf.cmake + " " + CMAKE_GENERATOR +
++        cmakeCall := "cmake " + CMAKE_GENERATOR +
+                      CMAKE_BUILD_TYPE + " " + CC + " " + CXX +
+                      " ..";
+         cmd := "cd " + dquote + fmuSourceDir + dquote + " && " +

@@ -3,6 +3,10 @@
 git submodule -q sync
 git submodule -q update --init --recursive
 
+# dont include the build prefix that wont exist when compiling FMUs
+export CC=`basename ${CC}`
+export CPP=`basename ${CPP}`
+
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
 curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d OMCompiler/3rdParty
 
