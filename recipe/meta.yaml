@@ -9,8 +9,12 @@ source:
   git_url: https://github.com/OpenModelica/OpenModelica.git
   git_tag: v{{ version }}
 
+  patches:
+    # avoid build-time compilation tools paths
+    - hardcoded.patch
+
 build:
-  number: 0
+  number: 1
   skip: true  # [not linux]
 
 requirements:
