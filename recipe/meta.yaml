@@ -14,7 +14,7 @@ source:
     - hardcoded.patch
 
 build:
-  number: 2
+  number: 3
   skip: true  # [not linux]
 
 requirements:
@@ -41,6 +41,7 @@ requirements:
     - cmake
     - make
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
     - zip
 
