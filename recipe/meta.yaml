@@ -1,4 +1,4 @@
-{% set version = "1.22.2" %}
+{% set version = "1.23.0" %}
 
 package:
   name: omcompiler
@@ -9,12 +9,8 @@ source:
   git_url: https://github.com/OpenModelica/OpenModelica.git
   git_tag: v{{ version }}
 
-  patches:
-    # avoid build-time compilation tools paths
-    - hardcoded.patch
-
 build:
-  number: 3
+  number: 0
   skip: true  # [not linux]
 
 requirements:
@@ -26,6 +22,7 @@ requirements:
     - automake
     - make
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
     - {{ compiler('fortran') }}
   host:
