@@ -14,5 +14,6 @@ cmake ${CMAKE_ARGS} -G "Ninja" -LAH \
   -DCMAKE_PREFIX_PATH=${PREFIX} \
   -DOM_ENABLE_GUI_CLIENTS=OFF \
   -DOM_USE_CCACHE=OFF \
+  -DBLA_VENDOR=Generic \
   -B build -S .
 cmake --build build --target install
