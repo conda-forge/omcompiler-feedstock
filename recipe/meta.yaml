@@ -15,7 +15,7 @@ build:
 
 requirements:
   build:
-    - cmake
+    - cmake <4
     - ninja
     - pkg-config
     - autoconf
