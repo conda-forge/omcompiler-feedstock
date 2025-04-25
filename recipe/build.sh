@@ -16,4 +16,4 @@ cmake ${CMAKE_ARGS} -G "Ninja" -LAH \
   -DOM_USE_CCACHE=OFF \
   -DBLA_VENDOR=Generic \
   -B build -S .
-cmake --build build --target install
+cmake --build build --target install --parallel ${CPU_COUNT}
