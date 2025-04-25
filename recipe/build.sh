@@ -12,6 +12,7 @@ curl -L https://github.com/OpenModelica/OpenModelica/pull/13782.patch | patch -p
 cmake ${CMAKE_ARGS} -G "Ninja" -LAH \
   -DCMAKE_INSTALL_PREFIX=${PREFIX} \
   -DCMAKE_PREFIX_PATH=${PREFIX} \
+  -DCMAKE_FIND_FRAMEWORK=NEVER \
   -DOM_ENABLE_GUI_CLIENTS=OFF \
   -DOM_USE_CCACHE=OFF \
   -DBLA_VENDOR=Generic \

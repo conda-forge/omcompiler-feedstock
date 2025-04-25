@@ -33,6 +33,7 @@ requirements:
     - libboost-devel
     - libiconv
     - libuuid
+    - libintl-devel  # [osx]
   run:
     - openjdk
     - cmake
