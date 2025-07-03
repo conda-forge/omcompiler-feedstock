@@ -1,4 +1,4 @@
-{% set version = "1.25.0" %}
+{% set version = "1.25.1" %}
 
 package:
   name: omcompiler
@@ -15,7 +15,7 @@ build:
 
 requirements:
   build:
-    - cmake <4
+    - cmake
     - ninja
     - pkg-config
     - autoconf
