@@ -32,7 +32,6 @@ requirements:
     - libcurl
     - libboost-devel
     - libiconv
-    - libuuid
   run:
     - openjdk
     - cmake
