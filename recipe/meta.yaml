@@ -24,7 +24,6 @@ requirements:
     - {{ compiler('c') }}
     - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
   host:
     - openjdk
     - libblas
