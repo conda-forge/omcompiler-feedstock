@@ -11,16 +11,17 @@ source:
 
 build:
   number: 0
-  skip: true  # [not linux]
+  skip: true  # [osx]
 
 requirements:
   build:
     - cmake
     - ninja
     - pkg-config
-    - autoconf
-    - automake
-    - make
+    - autoconf  # [unix]
+    - automake  # [unix]
+    - make  # [unix]
+    - ninja  # [win]
     - {{ compiler('c') }}
     - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
@@ -35,7 +36,7 @@ requirements:
   run:
     - openjdk
     - cmake
-    - make
+    - make  # [unix]
     - {{ compiler('c') }}
     - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
@@ -46,12 +47,12 @@ test:
     - OMCompiler/Examples/Circle.mo
   commands:
     - omc --version
-    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos
-    - omc export.mos
-    - ls Circle.fmu
-    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle, platforms={"dynamic"}); getErrorString();' > export.mos
-    - omc --fmuCMakeBuild=true --fmuRuntimeDepends=modelica export.mos
-    - ls Circle.fmu
+    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle); getErrorString();' > export.mos  # [unix]
+    - omc export.mos  # [unix]
+    - ls Circle.fmu  # [unix]
+    - echo 'loadFile("OMCompiler/Examples/Circle.mo"); getErrorString(); buildModelFMU(Circle, platforms={"dynamic"}); getErrorString();' > export.mos  # [unix]
+    - omc --fmuCMakeBuild=true --fmuRuntimeDepends=modelica export.mos  # [unix]
+    - ls Circle.fmu  # [unix]
 
 about:
    home: https://openmodelica.org/
