@@ -33,6 +33,7 @@ requirements:
     - libcurl
     - libboost-devel
     - libiconv
+    - pthreads-win32  # [win]
   run:
     - openjdk
     - cmake
