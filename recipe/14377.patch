@@ -1,0 +1,853 @@
+From 4f2f1c0dd6ea1b073fcdaadc0f2d793091c1a261 Mon Sep 17 00:00:00 2001
+From: Andreas <38031952+AnHeuermann@users.noreply.github.com>
+Date: Tue, 23 Sep 2025 17:13:48 +0200
+Subject: [PATCH 1/3] CMake FMU export adding missing source files (#14368)
+
+* Install minpackP.h to external_solver dir
+
+  - Fixes failed copy of minpackP.h to source-code FMU
+
+* Copying ModelicaExternalC from CMake
+
+  - ModelicaExternalC C source files are now installed with
+    ModelicaExternalC CMake file instead of C runtime makefile.
+  - Changed install location to install/include/omc/ModelicaExternalC/
+  - Updated copy call in SimCodeMain.mo to use new location
+
+* Adding test for FMU export with MSL Table
+
+  - Test FMU export
+  - Test recompilation with FMPy
+---
+ Jenkinsfile                                   | 275 ++++++++++--------
+ OMCompiler/Compiler/SimCode/SimCodeMain.mo    |   4 +-
+ .../ModelicaExternalC/CMakeLists.txt          |  22 +-
+ .../MEC_standalone_2.8.cmake                  |  21 ++
+ .../SimulationRuntime/c/Makefile.common       |   5 +-
+ .../c/RuntimeSources.mo.cmake                 |   1 -
+ .../SimulationRuntime/c/RuntimeSources.mo.tpl |   1 -
+ .../c/cmake/source_code_fmu_config.cmake      |   3 +-
+ .../fmi/ModelExchange/2.0/Makefile            |   3 +-
+ .../2.0/testModelicaStandardTables.mos        |  32 ++
+ testsuite/special/FMPy/.gitignore             |   1 +
+ testsuite/special/FMPy/Makefile               |  24 +-
+ .../testCompileModelicaStandardTables.mos     |  23 ++
+ .../special/FmuExportCrossCompile/Makefile    |   2 +
+ 14 files changed, 271 insertions(+), 146 deletions(-)
+ create mode 100644 testsuite/openmodelica/fmi/ModelExchange/2.0/testModelicaStandardTables.mos
+ create mode 100644 testsuite/special/FMPy/testCompileModelicaStandardTables.mos
+
+diff --git a/Jenkinsfile b/Jenkinsfile
+index ed10c210a49..291962bdfc8 100644
+--- a/Jenkinsfile
++++ b/Jenkinsfile
+@@ -58,8 +58,10 @@ pipeline {
+               image 'docker.openmodelica.org/build-deps:v1.22.2'
+               label 'linux'
+               alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -76,8 +78,10 @@ pipeline {
+               image 'docker.openmodelica.org/build-deps:v1.22.2'
+               label 'linux'
+               alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           steps {
+@@ -152,8 +156,10 @@ pipeline {
+               image 'docker.openmodelica.org/build-deps:v1.22.2-qttools'
+               label 'linux'
+               alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           when {
+@@ -232,8 +238,10 @@ pipeline {
+               image 'docker.openmodelica.org/build-deps:v1.22.2'
+               label 'linux'
+               alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           steps {
+@@ -254,39 +262,7 @@ pipeline {
+     }
+     stage('tests') {
+       parallel {
+-        stage('07 cross-build-fmu') {
+-          agent {
+-            label 'linux'
+-          }
+-          environment {
+-            RUNTESTDB = "/cache/runtest/"
+-            LIBRARIES = "/cache/omlibrary"
+-          }
+-          when {
+-            beforeAgent true
+-            expression { shouldWeRunTests }
+-          }
+-          steps {
+-            script {
+-              def deps = docker.build('testsuite-fmu-crosscompile', '--pull .CI/cache')
+-              // deps.pull() // Already built...
+-              def dockergid = sh (script: 'stat -c %g /var/run/docker.sock', returnStdout: true).trim()
+-              deps.inside("-v /var/run/docker.sock:/var/run/docker.sock --group-add '${dockergid}' " +
+-                          "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary") {
+-                common.standardSetup()
+-                unstash 'omc-clang'
+-                common.makeLibsAndCache()
+-                writeFile file: 'testsuite/special/FmuExportCrossCompile/VERSION', text: common.getVersion()
+-                sh 'make -C testsuite/special/FmuExportCrossCompile/ dockerpull'
+-                sh 'make -C testsuite/special/FmuExportCrossCompile/ test'
+-                stash name: 'cross-fmu', includes: 'testsuite/special/FmuExportCrossCompile/*.fmu'
+-                stash name: 'cross-fmu-extras', includes: 'testsuite/special/FmuExportCrossCompile/*.mos, testsuite/special/FmuExportCrossCompile/*.csv, testsuite/special/FmuExportCrossCompile/*.sh, testsuite/special/FmuExportCrossCompile/*.opt, testsuite/special/FmuExportCrossCompile/*.txt, testsuite/special/FmuExportCrossCompile/VERSION'
+-                archiveArtifacts "testsuite/special/FmuExportCrossCompile/*.fmu"
+-              }
+-            }
+-          }
+-        }
+-        stage('04 testsuite-clang 1/3') {
++        stage('01 testsuite-gcc 1/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+@@ -298,9 +274,11 @@ pipeline {
+                * the tests run on a particular node, they might execute slightly slower
+                */
+               label 'linux'
+-              args "--mount type=volume,source=runtest-clang-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-gcc-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -314,27 +292,24 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-clang'
++              unstash 'omc-gcc'
+               common.makeLibsAndCache()
+               common.partest(1,3)
+             }
+           }
+         }
+-        stage('05 testsuite-clang 2/3') {
++
++        stage('02 testsuite-gcc 2/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+-              /* The cache Dockerfile makes /cache/runtest, etc world writable
+-               * This is necessary because we run the docker image as a user and need to
+-               * be able to have a global caching of the omlibrary parts and the runtest database.
+-               * Note that the database is stored in a volume on a per-node basis, so the first time
+-               * the tests run on a particular node, they might execute slightly slower
+-               */
+               label 'linux'
+-              args "--mount type=volume,source=runtest-clang-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-gcc-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -348,27 +323,24 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-clang'
++              unstash 'omc-gcc'
+               common.makeLibsAndCache()
+               common.partest(2,3)
+             }
+           }
+         }
+-        stage('06 testsuite-clang 3/3') {
++
++        stage('03 testsuite-gcc 3/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+-              /* The cache Dockerfile makes /cache/runtest, etc world writable
+-               * This is necessary because we run the docker image as a user and need to
+-               * be able to have a global caching of the omlibrary parts and the runtest database.
+-               * Note that the database is stored in a volume on a per-node basis, so the first time
+-               * the tests run on a particular node, they might execute slightly slower
+-               */
+               label 'linux'
+-              args "--mount type=volume,source=runtest-clang-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-gcc-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -382,22 +354,24 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-clang'
++              unstash 'omc-gcc'
+               common.makeLibsAndCache()
+               common.partest(3,3)
+             }
+           }
+         }
+ 
+-        stage('01 testsuite-gcc 1/3') {
++        stage('04 testsuite-clang 1/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+               label 'linux'
+-              args "--mount type=volume,source=runtest-gcc-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-clang-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -411,21 +385,24 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-gcc'
++              unstash 'omc-clang'
+               common.makeLibsAndCache()
+               common.partest(1,3)
+             }
+           }
+         }
+-        stage('02 testsuite-gcc 2/3') {
++
++        stage('05 testsuite-clang 2/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+               label 'linux'
+-              args "--mount type=volume,source=runtest-gcc-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-clang-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -439,21 +416,24 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-gcc'
++              unstash 'omc-clang'
+               common.makeLibsAndCache()
+               common.partest(2,3)
+             }
+           }
+         }
+-        stage('03 testsuite-gcc 3/3') {
++
++        stage('06 testsuite-clang 3/3') {
+           agent {
+             dockerfile {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+               label 'linux'
+-              args "--mount type=volume,source=runtest-gcc-cache,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-clang-cache,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -467,74 +447,73 @@ pipeline {
+           steps {
+             script {
+               common.standardSetup()
+-              unstash 'omc-gcc'
++              unstash 'omc-clang'
+               common.makeLibsAndCache()
+               common.partest(3,3)
+             }
+           }
+         }
+ 
+-        stage('08 testsuite-compliance') {
++        stage('07 cross-build-fmu') {
+           agent {
+-            dockerfile {
+-              additionalBuildArgs '--pull'
+-              dir '.CI/cache'
+-              /* The cache Dockerfile makes /cache/runtest, etc world writable
+-               * This is necessary because we run the docker image as a user and need to
+-               * be able to have a global caching of the omlibrary parts and the runtest database.
+-               * Note that the database is stored in a volume on a per-node basis, so the first time
+-               * the tests run on a particular node, they might execute slightly slower
+-               */
+-              label 'linux'
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
+-            }
++            label 'linux'
+           }
+           environment {
++            RUNTESTDB = "/cache/runtest/"
+             LIBRARIES = "/cache/omlibrary"
+-            COMPLIANCEEXTRAREPORTFLAGS = "--expectedFailures=.CI/compliance.failures --flakyTests=.CI/compliance.flaky"
+-            COMPLIANCEPREFIX = "compliance"
++            HOME = "${env.WORKSPACE}/libraries"
+           }
+           when {
+             beforeAgent true
+             expression { shouldWeRunTests }
+           }
+-          steps {
+-            script { common.compliance() }
+-          }
+-        }
+-
+-        stage('10 build-gui-clang-qt5') {
+-          agent {
+-            docker {
+-              image 'docker.openmodelica.org/build-deps:v1.22.2'
+-              label 'linux'
+-              alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary"
+-            }
+-          }
+           steps {
+             script {
+-              common.buildGUI('omc-clang', 'qt5')
++              def deps = docker.build('testsuite-fmu-crosscompile', '--pull .CI/cache')
++              // deps.pull() // Already built...
++              def dockergid = sh (script: 'stat -c %g /var/run/docker.sock', returnStdout: true).trim()
++              deps.inside("-v /var/run/docker.sock:/var/run/docker.sock --group-add '${dockergid}' " +
++                          "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
++                          "--mount type=volume,source=runtest-gcc-cache,target=/cache/runtest") {
++                common.standardSetup()
++                unstash 'omc-clang'
++                common.makeLibsAndCache()
++                writeFile file: 'testsuite/special/FmuExportCrossCompile/VERSION', text: common.getVersion()
++                sh 'make -C testsuite/special/FmuExportCrossCompile/ dockerpull'
++                sh 'make -C testsuite/special/FmuExportCrossCompile/ test'
++                sh 'make -C testsuite/special/FMPy/ fmpy-fmus'
++                stash name: 'cross-fmu', includes: 'testsuite/special/FmuExportCrossCompile/*.fmu, testsuite/special/FMPy/Makefile'
++                stash name: 'fmpy-fmu', includes: 'testsuite/special/FMPy/*.fmu'
++                stash name: 'cross-fmu-extras', includes: 'testsuite/special/FmuExportCrossCompile/*.mos, testsuite/special/FmuExportCrossCompile/*.csv, testsuite/special/FmuExportCrossCompile/*.sh, testsuite/special/FmuExportCrossCompile/*.opt, testsuite/special/FmuExportCrossCompile/*.txt, testsuite/special/FmuExportCrossCompile/VERSION'
++                archiveArtifacts "testsuite/special/FmuExportCrossCompile/*.fmu"
++              }
+             }
+-            stash name: 'omedit-testsuite-clang-qt5', includes: 'build/**, **/config.status, OMEdit/**'
+           }
+         }
+ 
+-        stage('11 build-gui-clang-qt6') {
++        stage('08 testsuite-compliance') {
+           agent {
+-            docker {
+-              image 'docker.openmodelica.org/build-deps:v1.22.6-qttools'
++            dockerfile {
++              additionalBuildArgs '--pull'
++              dir '.CI/cache'
+               label 'linux'
+-              alwaysPull true
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
++          environment {
++            LIBRARIES = "/cache/omlibrary"
++            COMPLIANCEEXTRAREPORTFLAGS = "--expectedFailures=.CI/compliance.failures --flakyTests=.CI/compliance.flaky"
++            COMPLIANCEPREFIX = "compliance"
++          }
++          when {
++            beforeAgent true
++            expression { shouldWeRunTests }
++          }
+           steps {
+-            script {
+-              common.buildGUI('omc-clang', 'qt6')
+-            }
+-            stash name: 'omedit-testsuite-clang-qt6', includes: 'build/**, **/config.status, OMEdit/**'
++            script { common.compliance() }
+           }
+         }
+ 
+@@ -544,8 +523,10 @@ pipeline {
+               additionalBuildArgs '--pull'
+               dir '.CI/cache'
+               label 'linux'
+-              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -578,6 +559,40 @@ pipeline {
+           }
+         }
+ 
++        stage('10 build-gui-clang-qt5') {
++          agent {
++            docker {
++              image 'docker.openmodelica.org/build-deps:v1.22.2'
++              label 'linux'
++              alwaysPull true
++              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary"
++            }
++          }
++          steps {
++            script {
++              common.buildGUI('omc-clang', 'qt5')
++            }
++            stash name: 'omedit-testsuite-clang-qt5', includes: 'build/**, **/config.status, OMEdit/**'
++          }
++        }
++
++        stage('11 build-gui-clang-qt6') {
++          agent {
++            docker {
++              image 'docker.openmodelica.org/build-deps:v1.22.6-qttools'
++              label 'linux'
++              alwaysPull true
++              args "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary"
++            }
++          }
++          steps {
++            script {
++              common.buildGUI('omc-clang', 'qt6')
++            }
++            stash name: 'omedit-testsuite-clang-qt6', includes: 'build/**, **/config.status, OMEdit/**'
++          }
++        }
++
+         stage('12 testsuite-clang-parmod') {
+           agent {
+             docker {
+@@ -645,9 +660,11 @@ pipeline {
+             docker {
+               image 'docker.openmodelica.org/build-deps:v1.22.2'
+               label 'linux'
+-              args "--mount type=volume,source=runtest-clang-icon-generator,target=/cache/runtest " +
+-                   "--mount type=volume,source=omlibrary-cache,target=/cache/omlibrary " +
+-                   "-v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache"
++              args '''
++                --mount type=volume,source=runtest-clang-icon-generator,target=/cache/runtest \
++                --mount type=volume,source=omlibrary-cache,target=/cache/omlibrary \
++                -v /var/lib/jenkins/gitcache:/var/lib/jenkins/gitcache
++              '''
+             }
+           }
+           environment {
+@@ -719,10 +736,10 @@ pipeline {
+           steps {
+             echo "${env.NODE_NAME}"
+             unstash 'cross-fmu'
++            unstash 'fmpy-fmu'
+             sh '''
+             export HOME="$PWD"
+             cd testsuite/special/FMPy/
+-            make clean
+             make test
+             '''
+           }
+diff --git a/OMCompiler/Compiler/SimCode/SimCodeMain.mo b/OMCompiler/Compiler/SimCode/SimCodeMain.mo
+index dbc6a69f247..2c9dc5d8d1b 100644
+--- a/OMCompiler/Compiler/SimCode/SimCodeMain.mo
++++ b/OMCompiler/Compiler/SimCode/SimCodeMain.mo
+@@ -910,8 +910,8 @@ algorithm
+         * Check if modelicaStandardTables source files are needed
+         * this is not clear as of now, may be we should copy all the external C sources by default
+         */
+-        copyFiles(RuntimeSources.modelica_external_c_sources, source=install_include_omc_c_dir, destination=fmu_tmp_sources_dir);
+-        copyFiles(RuntimeSources.modelica_external_c_headers, source=install_include_omc_c_dir, destination=fmu_tmp_sources_dir);
++        copyFiles(RuntimeSources.modelica_external_c_sources, source=install_include_omc_dir, destination=fmu_tmp_sources_dir);
++        copyFiles(RuntimeSources.modelica_external_c_headers, source=install_include_omc_dir, destination=fmu_tmp_sources_dir);
+         modelica_standard_table_sources := RuntimeSources.modelica_external_c_sources;
+ 
+         System.writeFile(fmutmp+"/sources/isfmi" + (if FMUVersion=="1.0" then "1" else "2"), "");
+diff --git a/OMCompiler/SimulationRuntime/ModelicaExternalC/CMakeLists.txt b/OMCompiler/SimulationRuntime/ModelicaExternalC/CMakeLists.txt
+index e11269602d5..d4ecc0dd4b3 100644
+--- a/OMCompiler/SimulationRuntime/ModelicaExternalC/CMakeLists.txt
++++ b/OMCompiler/SimulationRuntime/ModelicaExternalC/CMakeLists.txt
+@@ -141,8 +141,28 @@ elseif(MSVC)
+   set_target_properties(ModelicaStandardTables_shared PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
+ endif()
+ 
+-
+ ## Install
++
++# Common source files for all source-code-FMUs
++set(SOURCE_FMU_MODELICA_EXTERNAL_C_FILES_LIST
++  C-Sources/ModelicaStandardTables.c
++  C-Sources/ModelicaStandardTablesDummyUsertab.c
++  C-Sources/ModelicaMatIO.c
++  C-Sources/ModelicaIO.c
++  C-Sources/snprintf.c)
++
++set(SOURCE_FMU_MODELICA_EXTERNAL_HEADER_FILES_LIST
++  C-Sources/ModelicaStandardTables.h
++  C-Sources/ModelicaMatIO.h
++  C-Sources/ModelicaIO.h
++  C-Sources/safe-math.h
++  C-Sources/read_data_impl.h
++)
++
++install(FILES ${SOURCE_FMU_MODELICA_EXTERNAL_C_FILES_LIST}
++              ${SOURCE_FMU_MODELICA_EXTERNAL_HEADER_FILES_LIST}
++              DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ModelicaExternalC)
++
+ # Install the static libs to the normal lib dir.
+ install(TARGETS ModelicaExternalC
+                 ModelicaMatIO
+diff --git a/OMCompiler/SimulationRuntime/ModelicaExternalC/MEC_standalone_2.8.cmake b/OMCompiler/SimulationRuntime/ModelicaExternalC/MEC_standalone_2.8.cmake
+index 224edf4acd4..3ef4fadfd03 100644
+--- a/OMCompiler/SimulationRuntime/ModelicaExternalC/MEC_standalone_2.8.cmake
++++ b/OMCompiler/SimulationRuntime/ModelicaExternalC/MEC_standalone_2.8.cmake
+@@ -150,6 +150,27 @@ endif()
+ 
+ 
+ ## Install
++
++# Common source files for all source-code-FMUs
++set(SOURCE_FMU_MODELICA_EXTERNAL_C_FILES_LIST
++  C-Sources/ModelicaStandardTables.c
++  C-Sources/ModelicaStandardTablesDummyUsertab.c
++  C-Sources/ModelicaMatIO.c
++  C-Sources/ModelicaIO.c
++  C-Sources/snprintf.c)
++
++set(SOURCE_FMU_MODELICA_EXTERNAL_HEADER_FILES_LIST
++  C-Sources/ModelicaStandardTables.h
++  C-Sources/ModelicaMatIO.h
++  C-Sources/ModelicaIO.h
++  C-Sources/safe-math.h
++  C-Sources/read_data_impl.h
++)
++
++install(FILES ${SOURCE_FMU_MODELICA_EXTERNAL_C_FILES_LIST}
++              ${SOURCE_FMU_MODELICA_EXTERNAL_HEADER_FILES_LIST}
++              DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ModelicaExternalC)
++
+ # Install the static libs to the normal lib dir.
+ install(TARGETS ModelicaExternalC
+                 ModelicaMatIO
+diff --git a/OMCompiler/SimulationRuntime/c/Makefile.common b/OMCompiler/SimulationRuntime/c/Makefile.common
+index 62ab10bc631..b01f3b9c23a 100644
+--- a/OMCompiler/SimulationRuntime/c/Makefile.common
++++ b/OMCompiler/SimulationRuntime/c/Makefile.common
+@@ -356,14 +356,11 @@ clean:
+ 	(! test -f $(EXTERNALCBUILDDIR)/Makefile) || make -C $(EXTERNALCBUILDDIR) clean
+ 	(! test -f $(EXTERNALCBUILDDIR)/Makefile) || make -C $(EXTERNALCBUILDDIR) distclean
+ 
+-sourcedist: sourcedist1 sourcedist2 sourcedist3
++sourcedist: sourcedist1 sourcedist2
+ sourcedist1:
+ 	$(MAKE) -f $(LIBMAKEFILE) OMC_MINIMAL_RUNTIME=1 OMC_FMI_RUNTIME=1 sourcedist_internal
+ sourcedist2:
+ 	$(MAKE) -C ../fmi/export/buildproject -f $(defaultMakefileTarget)
+-sourcedist3:
+-	mkdir -p $(builddir_inc)/c/ModelicaExternalC
+-	cp -p ../ModelicaExternalC/C-Sources/*.h ../ModelicaExternalC/C-Sources/*.c $(builddir_inc)/c/ModelicaExternalC
+ 
+ # Copied files need to preserve the time-stamp or the external solvers builds
+ # over and over again
+diff --git a/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.cmake b/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.cmake
+index 1544a801fb8..7b0d2c44de6 100644
+--- a/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.cmake
++++ b/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.cmake
+@@ -58,4 +58,3 @@ encapsulated package RuntimeSources
+ 
+ annotation(__OpenModelica_Interface="backend");
+ end RuntimeSources;
+-
+diff --git a/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.tpl b/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.tpl
+index 2a946253b68..4036e14c7ce 100644
+--- a/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.tpl
++++ b/OMCompiler/SimulationRuntime/c/RuntimeSources.mo.tpl
+@@ -49,4 +49,3 @@ encapsulated package RuntimeSources
+   constant list<String> simrt_mixed_solver_sources={MIXED_FILES};
+ annotation(__OpenModelica_Interface="backend");
+ end RuntimeSources;
+-
+diff --git a/OMCompiler/SimulationRuntime/c/cmake/source_code_fmu_config.cmake b/OMCompiler/SimulationRuntime/c/cmake/source_code_fmu_config.cmake
+index c99677cf058..623470290df 100644
+--- a/OMCompiler/SimulationRuntime/c/cmake/source_code_fmu_config.cmake
++++ b/OMCompiler/SimulationRuntime/c/cmake/source_code_fmu_config.cmake
+@@ -216,7 +216,8 @@ set(3RD_CMINPACK_FMU_FILES ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/cminpack.h
+                             ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/r1mpyq_.c)
+ 
+ set(3RD_CMINPACK_HEADERS  ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/cminpack.h
+-                            ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/minpack.h)
++                          ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/minpack.h
++                          ${OMCompiler_3rdParty_SOURCE_DIR}/CMinpack/minpackP.h)
+ 
+ install(FILES ${3RD_CMINPACK_HEADERS}
+               ${3RD_CMINPACK_FMU_FILES}
+diff --git a/testsuite/openmodelica/fmi/ModelExchange/2.0/Makefile b/testsuite/openmodelica/fmi/ModelExchange/2.0/Makefile
+index 0cc1ac16a53..428b273a5d6 100644
+--- a/testsuite/openmodelica/fmi/ModelExchange/2.0/Makefile
++++ b/testsuite/openmodelica/fmi/ModelExchange/2.0/Makefile
+@@ -36,9 +36,10 @@ testBug3049.mos \
+ testBug3763.mos \
+ testBug3846.mos \
+ testBug5673.mos \
++testDgesvSources.mos \
+ testDisableDep.mos \
+ testDiscreteStructe.mos \
+-testDgesvSources.mos \
++testModelicaStandardTables.mos \
+ TestSourceCodeFMU.mos \
+ ticket5670.mos \
+ ticket6262.mos \
+diff --git a/testsuite/openmodelica/fmi/ModelExchange/2.0/testModelicaStandardTables.mos b/testsuite/openmodelica/fmi/ModelExchange/2.0/testModelicaStandardTables.mos
+new file mode 100644
+index 00000000000..3f2620562c1
+--- /dev/null
++++ b/testsuite/openmodelica/fmi/ModelExchange/2.0/testModelicaStandardTables.mos
+@@ -0,0 +1,32 @@
++// name:     testModelicaStandardTables
++// keywords: fmi, tables
++// status:   correct
++// teardown_command: rm -rf TableTest* index.html
++//
++// test https://github.com/OpenModelica/OpenModelica/issues/13260
++//
++
++loadModel(Modelica); getErrorString();
++
++loadString("
++model TableTest
++  Modelica.Blocks.Tables.CombiTable1Ds table(extrapolation = Modelica.Blocks.Types.Extrapolation.HoldLastPoint,smoothness = Modelica.Blocks.Types.Smoothness.LinearSegments, table = [0, 0; 1, 10; 2, 0; 3, 10; 4, 0; 5, 10]);
++  Modelica.Blocks.Interfaces.RealInput real_setpoint;
++  Modelica.Blocks.Interfaces.RealOutput real_output;
++equation
++  connect(real_setpoint, table.u);
++  connect(table.y[1], real_output);
++annotation(uses(Modelica));
++end TableTest;
++"); getErrorString();
++
++buildModelFMU(TableTest); getErrorString();
++
++// Result:
++// true
++// ""
++// true
++// ""
++// "TableTest.fmu"
++// ""
++// endResult
+diff --git a/testsuite/special/FMPy/.gitignore b/testsuite/special/FMPy/.gitignore
+index dd9f2e94d6b..738439d7606 100644
+--- a/testsuite/special/FMPy/.gitignore
++++ b/testsuite/special/FMPy/.gitignore
+@@ -1,2 +1,3 @@
+ *_FMU/
+ *.fmu
++/TableTest/
+diff --git a/testsuite/special/FMPy/Makefile b/testsuite/special/FMPy/Makefile
+index 459ac65f724..155b35a296e 100644
+--- a/testsuite/special/FMPy/Makefile
++++ b/testsuite/special/FMPy/Makefile
+@@ -1,24 +1,32 @@
++OMC := $(shell test -e ../../../build/install_cmake/bin/omc && echo ../../../build/install_cmake/bin/omc \
++               || test -e ../../../build_cmake/install_cmake/bin/omc && echo ../../../build_cmake/install_cmake/bin/omc \
++               || echo ../../../build/bin/omc )
++OMC := $(shell realpath $(OMC))
+ 
+ FMPY_CALL = python3 -m fmpy
+ 
+-FMU_DIRECTORY = ../FmuExportCrossCompile
+ FMU = FmuExportCrossCompile.fmu \
+       RoomHeating_OM_RH.fmu \
+       WaterTank_Control.fmu \
+       WaterTank_TestSingleWaterTank.fmu \
+-      BouncingBall.fmu
++      BouncingBall.fmu \
++      TableTest.fmu
+ 
+-.PHONY: all test
++.PHONY: all test clean
+ 
+ all: compile_FMUs
+ 	$(MAKE) test
++
+ test: $(FMU)
+ 
+-%.fmu:
++copy:
++	cp ../FmuExportCrossCompile/*.fmu .
++
++%.fmu: copy
+ 	@echo -----------------------------------------------------------------------
+ 	@echo $@
+   # Remove binaries
+-	unzip -qq $(FMU_DIRECTORY)/$@ -d $@_FMU/
++	unzip -qq $@ -d $@_FMU/
+ 	rm -rf $@_FMU/binaries
+ 	cd $@_FMU/; zip -qqr ../$@ *
+ 	rm -rf $@_FMU/
+@@ -30,6 +38,10 @@ test: $(FMU)
+ compile_FMUs:
+ 	make -C ../FmuExportCrossCompile
+ 
++fmpy-fmus:
++	$(OMC) testCompileModelicaStandardTables.mos
++
+ clean:
+-	rm -f $(FMU)
++	rm -f $(FMU) *.fmu
+ 	rm -rf $(addsuffix _FMU/,$(FMU))
++	rm -rf TableTest/
+diff --git a/testsuite/special/FMPy/testCompileModelicaStandardTables.mos b/testsuite/special/FMPy/testCompileModelicaStandardTables.mos
+new file mode 100644
+index 00000000000..c803c989f3f
+--- /dev/null
++++ b/testsuite/special/FMPy/testCompileModelicaStandardTables.mos
+@@ -0,0 +1,23 @@
++// name: testCompileModelicaStandardTables
++//
++// Build TableTest.fmu
++
++loadModel(Modelica); getErrorString();
++
++loadString("
++model TableTest
++  Modelica.Blocks.Tables.CombiTable1Ds table(extrapolation = Modelica.Blocks.Types.Extrapolation.HoldLastPoint,smoothness = Modelica.Blocks.Types.Smoothness.LinearSegments, table = [0, 0; 1, 10; 2, 0; 3, 10; 4, 0; 5, 10]);
++  Modelica.Blocks.Interfaces.RealInput real_setpoint;
++  Modelica.Blocks.Interfaces.RealOutput real_output;
++equation
++  connect(real_setpoint, table.u);
++  connect(table.y[1], real_output);
++annotation(uses(Modelica));
++end TableTest;
++"); getErrorString();
++
++mkdir("TableTest"); getErrorString();
++cd("TableTest"); getErrorString();
++buildModelFMU(TableTest); getErrorString();
++
++copy("TableTest.fmu", "../TableTest.fmu"); getErrorString();
+diff --git a/testsuite/special/FmuExportCrossCompile/Makefile b/testsuite/special/FmuExportCrossCompile/Makefile
+index 6d1691180c4..9dd907504fe 100644
+--- a/testsuite/special/FmuExportCrossCompile/Makefile
++++ b/testsuite/special/FmuExportCrossCompile/Makefile
+@@ -8,6 +8,7 @@
+ OMC := $(shell test -e ../../../build/install_cmake/bin/omc && echo ../../../build/install_cmake/bin/omc \
+                || test -e ../../../build_cmake/install_cmake/bin/omc && echo ../../../build_cmake/install_cmake/bin/omc \
+                || echo ../../../build/bin/omc )
++OMC := $(shell realpath $(OMC))
+ 
+ test: clean
+ 	$(MAKE) fmuExportCrossCompile
+@@ -52,6 +53,7 @@ fmu-check:
+ 	./fmu-run.sh WaterTank_Control
+ 	./fmu-run.sh WaterTank_TestSingleWaterTank
+ 	$(OMC) check-files.mos
++
+ clean:
+ 	rm -rf *.json *.xml *.html *.fmu* *.c *.makefile *.log *.o *.opt *.libs *.h *.mat *.csv
+ 	rm -f BouncingBall FmuExportCrossCompile RoomHeating_OM_RH WaterTank_Control WaterTank_TestSingleWaterTank
+
+From 3630086cdffb0bbb2467b425be2ed64c53bccf32 Mon Sep 17 00:00:00 2001
+From: AnHeuermann <38031952+AnHeuermann@users.noreply.github.com>
+Date: Tue, 23 Sep 2025 19:24:00 +0200
+Subject: [PATCH 2/3] Debugging FMPy FMU
+
+---
+ Jenkinsfile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Jenkinsfile b/Jenkinsfile
+index 291962bdfc8..45ae43064f8 100644
+--- a/Jenkinsfile
++++ b/Jenkinsfile
+@@ -486,6 +486,7 @@ pipeline {
+                 stash name: 'fmpy-fmu', includes: 'testsuite/special/FMPy/*.fmu'
+                 stash name: 'cross-fmu-extras', includes: 'testsuite/special/FmuExportCrossCompile/*.mos, testsuite/special/FmuExportCrossCompile/*.csv, testsuite/special/FmuExportCrossCompile/*.sh, testsuite/special/FmuExportCrossCompile/*.opt, testsuite/special/FmuExportCrossCompile/*.txt, testsuite/special/FmuExportCrossCompile/VERSION'
+                 archiveArtifacts "testsuite/special/FmuExportCrossCompile/*.fmu"
++                archiveArtifacts "testsuite/special/FMPy/*.fmu"
+               }
+             }
+           }
+
+From 75a38dfa98b9600316d069e0527e4c900e5c38e4 Mon Sep 17 00:00:00 2001
+From: AnHeuermann <38031952+AnHeuermann@users.noreply.github.com>
+Date: Thu, 25 Sep 2025 10:03:12 +0200
+Subject: [PATCH 3/3] Disabeling test on Jenkins
+
+---
+ testsuite/special/FMPy/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/testsuite/special/FMPy/Makefile b/testsuite/special/FMPy/Makefile
+index 155b35a296e..869941b2105 100644
+--- a/testsuite/special/FMPy/Makefile
++++ b/testsuite/special/FMPy/Makefile
+@@ -10,7 +10,7 @@ FMU = FmuExportCrossCompile.fmu \
+       WaterTank_Control.fmu \
+       WaterTank_TestSingleWaterTank.fmu \
+       BouncingBall.fmu \
+-      TableTest.fmu
++#       TableTest.fmu # Disabled because it breaks on the maintenance/v1.25 branch. Works on the master branch
+ 
+ .PHONY: all test clean
+ 
