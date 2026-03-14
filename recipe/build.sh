@@ -1,7 +1,10 @@
 #!/bin/sh
 
-git submodule -q sync
-git submodule -q update --init --recursive
+set -x
+
+git config -f .gitmodules submodule.OMCompiler/3rdParty.url https://github.com/OpenModelica/OMCompiler-3rdParty.git
+git submodule -q sync --recursive OMCompiler/3rdParty
+git submodule -q update --force --init --recursive OMCompiler/3rdParty
 
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
 curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d OMCompiler/3rdParty
