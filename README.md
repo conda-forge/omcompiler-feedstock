@@ -5,7 +5,7 @@ Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/omcompiler-feed
 
 Home: https://openmodelica.org/
 
-Package license: OSMC-PL
+Package license: LicenseRef-OSMC-PL
 
 Summary: The Open Source Modelica Suite - OpenModelica Compiler
 
