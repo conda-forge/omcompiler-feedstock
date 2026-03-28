@@ -33,8 +33,6 @@ requirements:
        - autoconf
        - automake
        - make
-      else:
-        - pthreads-win32
   host:
     - openjdk
     - libblas
@@ -42,6 +40,10 @@ requirements:
     - libcurl
     - libboost-devel
     - libiconv
+    - if: win
+      then:
+        - pthreads-win32
+        - libintl-devel
   run:
     - openjdk
     - cmake
