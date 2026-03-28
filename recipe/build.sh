@@ -2,23 +2,23 @@
 
 set -x
 
-# git config -f .gitmodules submodule.OMCompiler/3rdParty.url https://github.com/OpenModelica/OMCompiler-3rdParty.git
+git config -f .gitmodules submodule.OMCompiler/3rdParty.url https://github.com/OpenModelica/OMCompiler-3rdParty.git
 # git submodule -q sync --recursive OMCompiler/3rdParty
 # git submodule -q update --force --init --recursive OMCompiler/3rdParty
-# 
-# git config -f .gitmodules submodule.OMOptim.url https://github.com/OpenModelica/OMOptim.git
+
+git config -f .gitmodules submodule.OMOptim.url https://github.com/OpenModelica/OMOptim.git
 # git submodule -q sync --recursive OMOptim
 # git submodule -q update --force --init --recursive OMOptim
-# 
-# git config -f .gitmodules submodule.OMSimulator.url https://github.com/OpenModelica/OMSimulator.git
+
+git config -f .gitmodules submodule.OMSimulator.url https://github.com/OpenModelica/OMSimulator.git
 # git submodule -q sync --recursive OMSimulator
 # git submodule -q update --force --init --recursive OMSimulator
-# 
-# git config -f .gitmodules submodule.OMSens_Qt.url https://github.com/OpenModelica/OMSens_Qt.git
+
+git config -f .gitmodules submodule.OMSens_Qt.url https://github.com/OpenModelica/OMSens_Qt.git
 # git submodule -q sync --recursive OMSens_Qt
 # git submodule -q update --force --init --recursive OMSens_Qt
-# 
-# git config -f .gitmodules submodule.OMCompiler/Compiler/boot/bomc.url https://github.com/OpenModelica/OMBootstrapping.git
+
+git config -f .gitmodules submodule.OMCompiler/Compiler/boot/bomc.url https://github.com/OpenModelica/OMBootstrapping.git
 # git submodule -q sync --recursive OMCompiler/Compiler/boot/bomc
 # git submodule -q update --force --init --recursive OMCompiler/Compiler/boot/bomc
 
