@@ -37,6 +37,10 @@ requirements:
     - libiconv
     - qt-webengine
     - openscenegraph
+    - if: linux
+      then:
+        - libgl-devel
+        - libegl-devel
   run:
     - openjdk
     - cmake
