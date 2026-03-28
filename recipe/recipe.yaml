@@ -9,7 +9,7 @@ source:
   # use git because no tarball including submodules is available
   git: https://github.com/OpenModelica/OpenModelica.git
   tag: v${{ version }}
-  submodules: false
+  submodules: true
 
 build:
   number: 0
@@ -35,6 +35,8 @@ requirements:
     - libcurl
     - libboost-devel
     - libiconv
+    - qt-webengine
+    - openscenegraph
   run:
     - openjdk
     - cmake
