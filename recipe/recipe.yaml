@@ -14,20 +14,22 @@ source:
 build:
   number: 0
   skip:
-    - not linux
+    - osx
 
 requirements:
   build:
     - cmake
     - ninja
-    - pkg-config
-    - autoconf
-    - automake
-    - make
     - ${{ stdlib('c') }}
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - ${{ compiler('fortran') }}
+    - if: unix
+      then:
+       - pkg-config
+       - autoconf
+       - automake
+       - make
   host:
     - openjdk
     - libblas
