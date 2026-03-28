@@ -19,8 +19,8 @@ git submodule -q sync --recursive OMSens_Qt
 git submodule -q update --force --init --recursive OMSens_Qt
 
 git config -f .gitmodules submodule.OMCompiler/Compiler/boot/bomc.url https://github.com/OpenModelica/OMBootstrapping.git
-git submodule -q sync --recursive OMCompiler/Compiler/boot/bomc
-git submodule -q update --force --init --recursive OMCompiler/Compiler/boot/bomc
+# git submodule -q sync --recursive OMCompiler/Compiler/boot/bomc
+# git submodule -q update --force --init --recursive OMCompiler/Compiler/boot/bomc
 
 # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
 curl -L https://github.com/OpenModelica/OMCompiler-3rdParty/pull/89.patch | patch -p1 -d OMCompiler/3rdParty
