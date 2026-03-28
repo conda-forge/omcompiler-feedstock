@@ -1,0 +1,12 @@
+diff --git a/OMCompiler/SimulationRuntime/c/gc/CMakeLists.txt b/OMCompiler/SimulationRuntime/c/gc/CMakeLists.txt
+index 6c223a5fa4..a51aae65d1 100644
+--- a/OMCompiler/SimulationRuntime/c/gc/CMakeLists.txt
++++ b/OMCompiler/SimulationRuntime/c/gc/CMakeLists.txt
+@@ -15,6 +15,7 @@ add_library(omc::simrt::runtime::gc ALIAS OpenModelicaRuntimeCGC)
+ target_include_directories(OpenModelicaRuntimeCGC
+   PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/c/gc>
+ )
+ 
