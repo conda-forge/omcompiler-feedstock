@@ -1,0 +1,19 @@
+diff --git a/cmake/OMCPThreads.cmake b/cmake/OMCPThreads.cmake
+index c8136cb260..3609ba61bb 100644
+--- a/cmake/OMCPThreads.cmake
++++ b/cmake/OMCPThreads.cmake
+@@ -11,9 +11,12 @@
+ 
+ 
+ if(MSVC)
+-  find_package(pthreads CONFIG REQUIRED)
++  # find_package(pthreads CONFIG REQUIRED)
++  # find_package(Threads)
+   add_library(OMCPThreads INTERFACE)
+-  target_link_libraries(OMCPThreads INTERFACE PThreads4W::PThreads4W)
++  # target_link_libraries(OMCPThreads INTERFACE PThreads4W::PThreads4W)
++  # see pthreads-win32
++  target_link_libraries(OMCPThreads INTERFACE pthread)
+ else()
+   find_package(Threads)
+   add_library(OMCPThreads INTERFACE)

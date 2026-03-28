@@ -10,6 +10,9 @@ source:
   git: https://github.com/OpenModelica/OpenModelica.git
   tag: v${{ version }}
   submodules: false
+  patches:
+    # prefer pthreads-win32 over PThreads4W
+    - threads.patch
 
 build:
   number: 0
@@ -30,6 +33,8 @@ requirements:
        - autoconf
        - automake
        - make
+      else:
+        - pthreads-win32
   host:
     - openjdk
     - libblas
