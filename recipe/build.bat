@@ -2,6 +2,9 @@ git config -f .gitmodules submodule.OMCompiler/3rdParty.url https://github.com/O
 git submodule -q sync --recursive OMCompiler/3rdParty
 git submodule -q update --force --init --recursive OMCompiler/3rdParty
 
+set "OMDEV=%LIBRARY_PREFIX%"
+set "MSYSTEM_PREFIX=%LIBRARY_PREFIX%"
+
 cmake -LAH -G "Ninja" ^
     -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_PREFIX_PATH="%LIBRARY_PREFIX%" ^
