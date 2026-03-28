@@ -5,6 +5,8 @@ git submodule -q update --force --init --recursive OMCompiler/3rdParty
 set "OMDEV=%LIBRARY_PREFIX%"
 set "MSYSTEM_PREFIX=%LIBRARY_PREFIX%"
 
+echo target_compile_definitions(ffi PRIVATE FFI_STATIC_BUILD)>>OMCompiler/3rdParty/libffi/CMakeLists.txt
+
 cmake -LAH -G "Ninja" ^
     -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_PREFIX_PATH="%LIBRARY_PREFIX%" ^
