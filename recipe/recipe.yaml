@@ -9,10 +9,9 @@ source:
   # use git because no tarball including submodules is available
   git: https://github.com/OpenModelica/OpenModelica.git
   tag: v${{ version }}
-  submodules: false
 
 build:
-  number: 0
+  number: 1
   skip:
     - not linux
 
