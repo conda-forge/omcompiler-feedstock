@@ -9,6 +9,9 @@ source:
   # use git because no tarball including submodules is available
   git: https://github.com/OpenModelica/OpenModelica.git
   tag: v${{ version }}
+  patches:
+    # error: expected '=', ',', ';', 'asm' or '__attribute__' before 'void'
+    - fmilib-gnusource.patch
 
 build:
   number: 1

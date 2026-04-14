@@ -1,0 +1,37 @@
+From c692f8ba5948de3e44d6659a4c78ef8e264af551 Mon Sep 17 00:00:00 2001
+From: Julien Schueller <schueller@phimeca.com>
+Date: Tue, 3 Aug 2021 15:18:48 +0200
+Subject: [PATCH] FMIL: Drop _GNU_SOURCE define
+
+---
+ FMIL/CMakeLists.txt            | 4 ----
+ FMIL/Config.cmake/jmutil.cmake | 1 -
+ 2 files changed, 5 deletions(-)
+
+diff --git a/FMIL/CMakeLists.txt b/FMIL/CMakeLists.txt
+index f7372bf20..ac5250a5b 100644
+--- a/OMCompiler/3rdParty/FMIL/CMakeLists.txt
++++ b/OMCompiler/3rdParty/FMIL/CMakeLists.txt
+@@ -283,10 +283,6 @@ endif()
+ if(FMILIB_BUILD_SHARED_LIB)
+ 	add_library(fmilib_shared SHARED ${FMILIB_SHARED_SRC})
+ 
+-    if (UNIX)
+-        target_compile_definitions(fmilib_shared PRIVATE -D_GNU_SOURCE)
+-    endif()
+-
+ 	target_link_libraries(fmilib_shared ${FMILIB_SHARED_SUBLIBS})
+ 	set(FMILIB_TARGETS ${FMILIB_TARGETS} fmilib_shared)
+ endif()
+diff --git a/FMIL/Config.cmake/jmutil.cmake b/FMIL/Config.cmake/jmutil.cmake
+index 0cce2f7ca..f329f6f48 100644
+--- a/OMCompiler/3rdParty/FMIL/Config.cmake/jmutil.cmake
++++ b/OMCompiler/3rdParty/FMIL/Config.cmake/jmutil.cmake
+@@ -63,7 +63,6 @@ endif(CYGWIN)
+ target_link_libraries(jmutils c99snprintf)
+ 
+ if(UNIX)
+-    target_compile_definitions(jmutils PRIVATE -D_GNU_SOURCE)
+ 	target_link_libraries(jmutils dl)
+ endif(UNIX)
+ if(WIN32)
