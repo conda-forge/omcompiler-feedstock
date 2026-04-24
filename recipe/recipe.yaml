@@ -14,7 +14,7 @@ source:
     - fmilib-gnusource.patch
 
 build:
-  number: 1
+  number: 2
   skip:
     - not linux
 
@@ -60,11 +60,11 @@ tests:
         - OMCompiler/Examples/Circle.mo
 
 about:
-   homepage: https://openmodelica.org/
-   license: LicenseRef-OSMC-PL
-   license_family: GPL
-   license_file: OSMC-License.txt
-   summary: The Open Source Modelica Suite - OpenModelica Compiler
+  homepage: https://openmodelica.org/
+  license: LicenseRef-OSMC-PL
+  license_family: GPL
+  license_file: OSMC-License.txt
+  summary: The Open Source Modelica Suite - OpenModelica Compiler
 
 extra:
   recipe-maintainers:
